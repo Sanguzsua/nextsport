@@ -12,28 +12,38 @@ if ($conn->connect_error) {
     die("Error de conexión: " . $conn->connect_error);
 }
 
-// Recibir datos del formulario
-$usuario = $_POST["usuario"];
-$nombre = $_POST["nombre"];
-$apellido = $_POST["apellido"];
-$correo = $_POST["correo"];
-$telefono = $_POST["telefono"];
-$contrasena = password_hash($_POST["contrasena"], PASSWORD_DEFAULT); // Encriptar contraseña
-$estado = "activo"; // Por defecto, los nuevos usuarios estarán activos
+// Verificar si los datos del formulario están presentes
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Validar que los campos no estén vacíos
+    if (empty($_POST["id_registro"]) || empty($_POST["telefono"])) {
+        die("Los campos id_registro y telefono son obligatorios.");
+    }
 
-// Insertar en la base de datos
-$sql = "INSERT INTO clientes (usuario, nombre, apellido, correo, telefono, contrasena, estado) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)";
+    // Recibir datos del formulario
+    $id_registro = $_POST["id_registro"];
+    $telefono = $_POST["telefono"];
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("sssssss", $usuario, $nombre, $apellido, $correo, $telefono, $contrasena, $estado);
+    // Insertar en la base de datos
+    $sql = "INSERT INTO clientes (id_registro, telefono) 
+            VALUES (?, ?)";
 
-if ($stmt->execute()) {
-    echo "Usuario registrado con éxito.";
+    // Preparar la consulta
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $id_registro, $telefono);  // 'ss' porque ambos son cadenas de texto (strings)
+
+    // Ejecutar la consulta y verificar si fue exitosa
+    if ($stmt->execute()) {
+        echo "Datos registrados con éxito.";
+    } else {
+        echo "Error al registrar los datos: " . $stmt->error;
+    }
+
+    // Cerrar la sentencia
+    $stmt->close();
 } else {
-    echo "Error: " . $stmt->error;
+    echo "Solicitud incorrecta.";
 }
 
-$stmt->close();
+// Cerrar la conexión
 $conn->close();
 ?>

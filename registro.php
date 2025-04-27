@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "NextSport";
+$database = "nextsport";
 
 // Conectar a la base de datos
 $conn = new mysqli($servername, $username, $password, $database);
